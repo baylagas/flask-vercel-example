@@ -1,7 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 import sqlite3
 import os
+import dotenv
 
+from supabase import create_client, Client
+
+dotenv.load_dotenv()  # Load environment variables from .env file
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'  # Change this in production
 
@@ -40,6 +44,24 @@ def home():
 @app.route('/about')
 def about():
     return 'About'
+
+@app.route('/test_supa')
+def test_supa():
+   
+    url: str = os.environ.get("SUPABASE_URL")
+    key: str = os.environ.get("SUPABASE_KEY")
+    supabase: Client = create_client(url, key)
+    
+    """Test route to verify database connection"""
+    try:
+        response = (
+            supabase.table("Products")
+            .select("*")
+            .execute()
+        )
+        return f'Database connection successful!{response}'
+    except Exception as e:
+        return f'Database connection failed: {e}', 500
 
 # CRUD Routes for Persons
 @app.route('/persons')
